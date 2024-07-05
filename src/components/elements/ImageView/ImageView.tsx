@@ -23,7 +23,9 @@ const ImageView: React.FC<IImageViewProps> = ({
         onLoadEnd={onLoadEndHandler}
         {...restProps}
       />
-      {isLoading && <ActivityIndicator size="small" color={Colors.senary} />}
+      {isLoading && (
+        <ActivityIndicator size="small" color={Colors['light-green']} />
+      )}
     </React.Fragment>
   );
 };

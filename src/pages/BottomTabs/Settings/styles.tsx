@@ -5,6 +5,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingHorizontal: 30,
   },
+  whiteSpace: {height: 300},
 });
 
 export default styles;

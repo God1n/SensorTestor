@@ -1,4 +1,4 @@
-import {FlatList, View} from 'react-native';
+import {FlatList, ScrollView, View} from 'react-native';
 import React from 'react';
 import ButtonPrimary from '../../../components/buttons/ButtonPrimary/ButtonPrimary';
 import Label from '../../../components/elements/Label';
@@ -10,6 +10,7 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {AppStackParameterList} from '../../../navigation/AppStack';
 import {CompositeScreenProps} from '@react-navigation/native';
 import BleDevice from '../../../components/elements/cards/BleDevice';
+import PrimaryGraph from '../../../components/elements/graphs/PrimaryGraph';
 
 const Settings: React.FC<
   CompositeScreenProps<
@@ -17,10 +18,10 @@ const Settings: React.FC<
     NativeStackScreenProps<AppStackParameterList>
   >
 > = ({}) => {
-  const {peripherals, scan} = useSensors();
+  const {peripherals, sensorValues, scan} = useSensors();
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Label type="topic">Settings</Label>
       <ButtonPrimary onPress={scan} label="Scan Devices" />
       <FlatList
@@ -28,7 +29,10 @@ const Settings: React.FC<
         keyExtractor={item => item.id}
         renderItem={({item}) => <BleDevice device={item} />}
       />
-    </View>
+      <PrimaryGraph values={sensorValues} />
+
+      <View style={styles.whiteSpace} />
+    </ScrollView>
   );
 };
 

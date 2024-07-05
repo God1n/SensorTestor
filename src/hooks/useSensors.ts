@@ -19,12 +19,16 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 const useSensors = (): {
   peripherals: Map<string, Peripheral>;
+  sensorValues: number[];
   scan: () => void;
 } => {
   const [isScanning, setIsScanning] = useState(false);
   const [peripherals, setPeripherals] = useState(
     new Map<Peripheral['id'], Peripheral>(),
   );
+  const [sensorValues, setSensorValues] = useState<number[]>([
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  ]);
 
   const handleStopScan = () => {
     setIsScanning(false);
@@ -54,17 +58,34 @@ const useSensors = (): {
   const handleUpdateValueForCharacteristic = (
     data: BleManagerDidUpdateValueForCharacteristicEvent,
   ) => {
-    console.debug(
-      `[handleUpdateValueForCharacteristic] received data from '${data.peripheral}' with characteristic='${data.characteristic}' and value='${data.value}'`,
-    );
+    // console.debug(
+    //   `[handleUpdateValueForCharacteristic] received data from '${data.peripheral}' with characteristic='${data.characteristic}' and value='${data.value}'`,
+    // );
+    handleDecriptData(data.value);
+  };
+
+  const handleDecriptData = (bytes: number[]) => {
+    const integers: number[] = [];
+    for (let i = 0; i < bytes.length; i += 2) {
+      const byte1 = bytes[i];
+      const byte2 = bytes[i + 1];
+      // eslint-disable-next-line no-bitwise
+      const integer = (byte1 << 8) | byte2;
+      integers.push(integer);
+    }
+    setSensorValues(integers);
+    console.log('Decrypted integers:', integers);
   };
 
   const handleDiscoverPeripheral = (peripheral: Peripheral) => {
-    console.debug(
-      '[handleDiscoverPeripheral] new BLE peripheral=',
-      JSON.stringify(peripheral),
-    );
-    if (peripheral.name && peripheral.advertising.isConnectable) {
+    if (
+      peripheral.name === 'Left_Insole' &&
+      peripheral.advertising.isConnectable
+    ) {
+      console.debug(
+        '[handleDiscoverPeripheral] new BLE peripheral=',
+        JSON.stringify(peripheral),
+      );
       setPeripherals(map => {
         return new Map(map.set(peripheral.id, peripheral));
       });
@@ -111,6 +132,7 @@ const useSensors = (): {
         listener.remove();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAndroidPermissions = () => {
@@ -180,7 +202,7 @@ const useSensors = (): {
     }
   };
 
-  return {peripherals, scan};
+  return {peripherals, sensorValues, scan};
 };
 
 export default useSensors;
